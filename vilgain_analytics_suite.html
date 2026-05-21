@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vilgain UK · Analytics Suite</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --border: #e4e2dc;
+  --border2: #ede9e2;
+  --text: #111111;
+  --text2: #555555;
+  --text3: #999999;
+  --green: #1a7a4a;
+  --green-bg: #e8f5ee;
+  --red: #c0392b;
+  --red-bg: #fdf0ee;
+  --amber: #b45309;
+  --amber-bg: #fef3e2;
+  --accent: #111111;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--text);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-title { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; }
+.topbar-sub { font-size: 11px; color: #888; letter-spacing: 0.05em; }
+.week-pill { font-family: var(--mono); font-size: 10px; background: #2a2a2a; color: #ccc; padding: 4px 10px; border-radius: 2px; letter-spacing: 0.08em; }
+
+/* ── TABS ── */
+.tab-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  padding: 0 28px;
+  overflow-x: auto;
+  gap: 0;
+}
+.tab-btn {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 14px 18px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
+/* ── PANELS ── */
+.panel { display: none; padding: 28px; }
+.panel.active { display: block; }
+
+/* ── SECTION TITLE ── */
+.section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 14px;
+  margin-top: 24px;
+}
+.section-label:first-child { margin-top: 0; }
+
+/* ── GRIDS ── */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 18px 20px 20px;
+}
+.card-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 14px;
+}
+
+/* ── KPI TILE ── */
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px 18px; }
+.kpi-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.kpi-val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); line-height: 1; }
+.kpi-val.sm { font-size: 18px; }
+.kpi-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.kpi-delta { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; margin-top: 6px; padding: 2px 7px; border-radius: 2px; }
+.kpi-delta.pos { color: var(--green); background: var(--green-bg); }
+.kpi-delta.neg { color: var(--red); background: var(--red-bg); }
+.kpi-delta.neu { color: var(--amber); background: var(--amber-bg); }
+
+/* ── PROGRESS BAR ── */
+.prog-wrap { margin-bottom: 13px; }
+.prog-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.prog-name { font-size: 11px; color: var(--text2); }
+.prog-vals { font-family: var(--mono); font-size: 11px; color: var(--text); }
+.prog-vals span { color: var(--text3); font-size: 10px; }
+.prog-track { position: relative; height: 7px; background: var(--border2); border-radius: 4px; overflow: visible; }
+.prog-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+.prog-fill.on-track { background: var(--text); }
+.prog-fill.behind { background: var(--red); }
+.prog-fill.ahead { background: var(--green); }
+.prog-marker { position: absolute; top: -4px; width: 2px; height: 15px; background: #bbb; border-radius: 1px; }
+
+/* ── HORIZONTAL BAR ── */
+.hbar-wrap { margin-bottom: 10px; }
+.hbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.hbar-label { font-size: 11px; color: var(--text2); width: 110px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hbar-track { flex: 1; height: 20px; background: var(--border2); border-radius: 2px; overflow: hidden; position: relative; }
+.hbar-fill { height: 100%; border-radius: 2px; display: flex; align-items: center; padding-right: 8px; justify-content: flex-end; min-width: 20px; }
+.hbar-fill span { font-size: 10px; font-weight: 700; color: #fff; font-family: var(--mono); }
+.hbar-tgt { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(0,0,0,0.2); }
+.hbar-delta { font-family: var(--mono); font-size: 10px; font-weight: 500; width: 42px; text-align: right; flex-shrink: 0; }
+
+/* ── FUNNEL ── */
+.funnel-step { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.funnel-label { font-size: 11px; color: var(--text2); width: 130px; flex-shrink: 0; }
+.funnel-track { flex: 1; height: 22px; background: var(--border2); border-radius: 2px; overflow: hidden; position: relative; }
+.funnel-bar { height: 100%; border-radius: 2px; display: flex; align-items: center; padding: 0 8px; justify-content: flex-end; }
+.funnel-bar span { font-size: 10px; font-weight: 700; color: #fff; font-family: var(--mono); }
+.funnel-tgt { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(0,0,0,0.15); }
+.funnel-delta { font-family: var(--mono); font-size: 10px; font-weight: 500; width: 42px; text-align: right; flex-shrink: 0; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 0 8px 8px 0; text-align: left; border-bottom: 1px solid var(--border); }
+.data-table td { font-size: 12px; color: var(--text); padding: 9px 8px 0 0; vertical-align: middle; }
+.data-table tr:not(:last-child) td { border-bottom: 1px solid var(--border2); padding-bottom: 9px; }
+.data-table td:last-child, .data-table th:last-child { text-align: right; }
+.rank { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+/* ── MINI SPARKLINE ── */
+.spark-cell { display: flex; align-items: center; gap: 6px; }
+
+/* ── DONUT ── */
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-legend { flex: 1; }
+.donut-leg-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.donut-leg-name { font-size: 11px; color: var(--text2); flex: 1; }
+.donut-leg-val { font-family: var(--mono); font-size: 11px; color: var(--text); font-weight: 500; }
+
+/* ── DAILY BARS ── */
+.daily-chart { display: flex; align-items: flex-end; gap: 5px; height: 70px; }
+.day-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.day-bar { width: 100%; border-radius: 2px 2px 0 0; background: var(--text); min-height: 4px; }
+.day-bar.today { background: var(--green); }
+.day-label { font-size: 9px; color: var(--text3); font-family: var(--mono); }
+
+/* ── TAG ── */
+.tag { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
+.tag.pos { color: var(--green); background: var(--green-bg); }
+.tag.neg { color: var(--red); background: var(--red-bg); }
+.tag.neu { color: var(--amber); background: var(--amber-bg); }
+
+/* ── MOBILE VS DESKTOP ── */
+.split-bar { height: 28px; border-radius: 3px; overflow: hidden; display: flex; margin-bottom: 10px; }
+.split-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; font-family: var(--mono); }
+
+/* ── CHANNEL PILL LIST ── */
+.channel-list { display: flex; flex-direction: column; gap: 8px; }
+.channel-row { display: flex; align-items: center; gap: 10px; }
+.channel-name { font-size: 11px; color: var(--text2); width: 100px; }
+.channel-track { flex: 1; height: 8px; background: var(--border2); border-radius: 4px; overflow: hidden; }
+.channel-fill { height: 100%; border-radius: 4px; }
+.channel-val { font-family: var(--mono); font-size: 11px; color: var(--text); width: 44px; text-align: right; }
+
+/* ── RETURN REASONS ── */
+.reason-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border2); }
+.reason-row:last-child { border-bottom: none; }
+.reason-text { font-size: 12px; color: var(--text2); }
+.reason-val { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+
+/* ── PERIOD TABS ── */
+.period-tabs { display: flex; gap: 0; margin-bottom: 14px; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; width: fit-content; }
+.period-tab { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; cursor: pointer; background: none; border: none; color: var(--text3); border-right: 1px solid var(--border); font-family: var(--sans); }
+.period-tab:last-child { border-right: none; }
+.period-tab.active { background: var(--text); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <svg width="26" height="24" viewBox="0 0 66 62" fill="none"><path d="M63.86 15.77C59.99 5.17 50.9.27 50.9.27L19.1 21.09 6.11 13.81S2.22 18.76.26 24.21C6.78 31.67 12.67 36.04 17.14 39.14c0 0-3.22 5.45-8.96 4.65 3.51 5.75 8.39 12.1 15.07 17.94H38.89s8.28-7.13 19.17-18.8c5.56-5.67 7.16-11.44 7.57-15.39.4-3.95-.28-7.87-1.77-11.77zm-16.47 23.71C40.61 46.47 29.51 46.28 23.28 39.1c0 0 13-8.71 27.29-22.41 0 0 .68 1.24 1.48 4.05.56 2.08.6 3.98.54 6.11-.09 4.32-2.07 9.5-5.2 12.63z" fill="#fff"/></svg>
+    <div>
+      <div class="topbar-title">Analytics Suite</div>
+      <div class="topbar-sub">Vilgain UK &nbsp;·&nbsp; Country Manager View</div>
+    </div>
+  </div>
+  <div class="week-pill">W20 · MAY 2026</div>
+</div>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab(0)">01 Revenue &amp; Growth</button>
+  <button class="tab-btn" onclick="showTab(1)">02 Conversion Funnel</button>
+  <button class="tab-btn" onclick="showTab(2)">03 Marketing Efficiency</button>
+  <button class="tab-btn" onclick="showTab(3)">04 CRM &amp; Retention</button>
+  <button class="tab-btn" onclick="showTab(4)">05 Product Performance</button>
+  <button class="tab-btn" onclick="showTab(5)">06 Customer Experience</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     01 REVENUE & GROWTH
+══════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-0">
+
+  <div class="section-label">Revenue Overview</div>
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">Gross Revenue</div>
+      <div class="kpi-val">£142.6k</div>
+      <div class="kpi-sub">MTD</div>
+      <div class="kpi-delta pos">▲ +18% MoM</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Net Revenue</div>
+      <div class="kpi-val">£134.1k</div>
+      <div class="kpi-sub">After refunds &amp; discounts</div>
+      <div class="kpi-delta pos">▲ +15% MoM</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Orders Count</div>
+      <div class="kpi-val">3,847</div>
+      <div class="kpi-sub">MTD</div>
+      <div class="kpi-delta pos">▲ +12% MoM</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-val">£34.82</div>
+      <div class="kpi-sub">vs £32.10 target</div>
+      <div class="kpi-delta pos">▲ +8.5%</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Growth Rate</div>
+  <div class="grid-3">
+    <div class="kpi">
+      <div class="kpi-label">Revenue Growth WoW</div>
+      <div class="kpi-val sm">+6.4%</div>
+      <div class="kpi-sub">vs last week</div>
+      <div class="kpi-delta pos">On Track</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Revenue Growth MoM</div>
+      <div class="kpi-val sm">+18.2%</div>
+      <div class="kpi-sub">vs April 2026</div>
+      <div class="kpi-delta pos">Above target +12%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Revenue Growth YoY</div>
+      <div class="kpi-val sm">+41.7%</div>
+      <div class="kpi-sub">vs May 2025</div>
+      <div class="kpi-delta pos">Strong growth</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Daily Revenue · This Week</div>
+  <div class="card">
+    <div class="card-title">Daily Revenue (£) · Mon–Sun</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px" id="daily-bars"></div>
+    <div style="display:flex;gap:6px;margin-top:6px" id="daily-labels"></div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">MTD Targets &amp; Profitability</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">MTD Revenue vs Target</div>
+      <div id="mtd-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Profitability Metrics</div>
+      <div class="grid-2" style="gap:10px">
+        <div style="background:var(--bg);border-radius:3px;padding:12px 14px">
+          <div class="kpi-label">Units Sold</div>
+          <div class="kpi-val sm">8,214</div>
+          <div class="kpi-sub">MTD</div>
+        </div>
+        <div style="background:var(--bg);border-radius:3px;padding:12px 14px">
+          <div class="kpi-label">Net Profit</div>
+          <div class="kpi-val sm">£38.4k</div>
+          <div class="kpi-sub">28.6% margin</div>
+        </div>
+        <div style="background:var(--bg);border-radius:3px;padding:12px 14px">
+          <div class="kpi-label">Contribution Margin</div>
+          <div class="kpi-val sm">42.1%</div>
+          <div class="kpi-sub">vs 40% target</div>
+        </div>
+        <div style="background:var(--bg);border-radius:3px;padding:12px 14px">
+          <div class="kpi-label">Refund Rate</div>
+          <div class="kpi-val sm">3.2%</div>
+          <div class="kpi-sub">vs 4% threshold</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     02 CONVERSION FUNNEL
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-1">
+
+  <div class="section-label">Session &amp; Conversion Overview</div>
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">Website Sessions</div>
+      <div class="kpi-val">42,614</div>
+      <div class="kpi-sub">WTD</div>
+      <div class="kpi-delta pos">▲ +9.2% WoW</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Conversion Rate</div>
+      <div class="kpi-val">3.8%</div>
+      <div class="kpi-sub">vs 4.2% target</div>
+      <div class="kpi-delta neg">▼ −0.4pp</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Bounce Rate</div>
+      <div class="kpi-val">38.2%</div>
+      <div class="kpi-sub">vs 42% target max</div>
+      <div class="kpi-delta pos">▼ Better</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Cart Abandonment</div>
+      <div class="kpi-val">68.4%</div>
+      <div class="kpi-sub">vs 65% target max</div>
+      <div class="kpi-delta neg">▲ +3.4pp</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Full Funnel Breakdown</div>
+  <div class="card">
+    <div class="card-title">Sessions → Purchase Funnel · WTD vs Target</div>
+    <div id="full-funnel"></div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Device &amp; Behaviour</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Mobile vs Desktop Split</div>
+      <div class="split-bar" style="margin-bottom:12px" id="device-split"></div>
+      <div id="device-breakdown"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Funnel Rates Summary</div>
+      <table class="data-table">
+        <thead><tr><th>Stage</th><th>Rate</th><th>Target</th><th>Delta</th></tr></thead>
+        <tbody id="funnel-summary"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     03 MARKETING EFFICIENCY
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-2">
+
+  <div class="section-label">Paid Performance</div>
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">ROAS</div>
+      <div class="kpi-val">4.2×</div>
+      <div class="kpi-sub">vs 4.0× target</div>
+      <div class="kpi-delta pos">▲ +5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">MER</div>
+      <div class="kpi-val">5.1×</div>
+      <div class="kpi-sub">Blended efficiency</div>
+      <div class="kpi-delta pos">▲ +2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Total Ad Spend</div>
+      <div class="kpi-val">£8.2k</div>
+      <div class="kpi-sub">MTD</div>
+      <div class="kpi-delta neu">+2.5% budget</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Blended CPA</div>
+      <div class="kpi-val">£9.40</div>
+      <div class="kpi-sub">vs £10 target</div>
+      <div class="kpi-delta pos">▼ −6%</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">CPA by Channel</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">CAC / CPA by Channel</div>
+      <div id="cpa-channels"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Paid Efficiency Trend · Last 8 Weeks</div>
+      <div style="display:flex;align-items:flex-end;gap:5px;height:80px;margin-bottom:8px" id="roas-trend"></div>
+      <div style="display:flex;gap:5px" id="roas-labels"></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Traffic Attribution</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Organic vs Paid Traffic Split</div>
+      <div class="split-bar" style="margin-bottom:14px" id="traffic-split"></div>
+      <div id="traffic-breakdown"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Attribution by Source · Revenue Share</div>
+      <div id="attribution-donut" class="donut-wrap"></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Top Performing Channels</div>
+  <div class="card">
+    <div class="card-title">Revenue by Channel · WTD</div>
+    <table class="data-table" id="channel-table"></table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     04 CRM & RETENTION
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-3">
+
+  <div class="section-label">Retention Overview</div>
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">Returning Customer Rate</div>
+      <div class="kpi-val">42.6%</div>
+      <div class="kpi-sub">vs 40% target</div>
+      <div class="kpi-delta pos">▲ +2.6pp</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Email Revenue MTD</div>
+      <div class="kpi-val">£31.4k</div>
+      <div class="kpi-sub">23.4% of total</div>
+      <div class="kpi-delta pos">▲ +14%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">SMS Revenue MTD</div>
+      <div class="kpi-val">£8.7k</div>
+      <div class="kpi-sub">6.5% of total</div>
+      <div class="kpi-delta pos">▲ +22%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Repeat Purchase Rate</div>
+      <div class="kpi-val">28.1%</div>
+      <div class="kpi-sub">30-day window</div>
+      <div class="kpi-delta neu">▲ +1.2pp</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Email Performance</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Email Metrics vs Target</div>
+      <div id="email-metrics"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Email Flows Performance · MTD Revenue</div>
+      <div id="email-flows"></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">CRM Channel Revenue</div>
+  <div class="card">
+    <div class="card-title">Email vs SMS Revenue Trend · Last 8 Weeks</div>
+    <div style="display:flex;gap:5px;align-items:flex-end;height:90px;margin-bottom:8px" id="crm-trend"></div>
+    <div style="display:flex;gap:5px" id="crm-labels"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     05 PRODUCT PERFORMANCE
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-4">
+
+  <div class="section-label">SKU Overview</div>
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">Total SKUs Active</div>
+      <div class="kpi-val">84</div>
+      <div class="kpi-sub">Live on site</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">SKUs vs Target</div>
+      <div class="kpi-val">61</div>
+      <div class="kpi-sub">72% hitting target</div>
+      <div class="kpi-delta pos">Good mix</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg SKU Revenue</div>
+      <div class="kpi-val">£1.60k</div>
+      <div class="kpi-sub">MTD</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Top 10 SKU Share</div>
+      <div class="kpi-val">48.2%</div>
+      <div class="kpi-sub">of total revenue</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Top &amp; Worst Performing SKUs</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🏆 Top 8 SKUs · Revenue MTD</div>
+      <table class="data-table" id="top-skus"></table>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ Worst 6 SKUs · Behind Target</div>
+      <table class="data-table" id="worst-skus"></table>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">SKU Conversion &amp; Units</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SKU Conversion Rate (PDP → ATC)</div>
+      <div id="sku-conv"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Units Sold by Category</div>
+      <div id="units-cat"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     06 CUSTOMER EXPERIENCE & RISK
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-5">
+
+  <div class="section-label">Customer Acquisition</div>
+  <div class="grid-4">
+    <div class="kpi">
+      <div class="kpi-label">New Customers MTD</div>
+      <div class="kpi-val">2,214</div>
+      <div class="kpi-sub">vs 2,000 target</div>
+      <div class="kpi-delta pos">▲ +10.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Returning Customer %</div>
+      <div class="kpi-val">42.6%</div>
+      <div class="kpi-sub">of all orders</div>
+      <div class="kpi-delta pos">▲ Above 40% target</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Customer LTV (12mo)</div>
+      <div class="kpi-val">£128</div>
+      <div class="kpi-sub">vs £110 target</div>
+      <div class="kpi-delta pos">▲ +16.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Delivery Issue Rate</div>
+      <div class="kpi-val">1.8%</div>
+      <div class="kpi-sub">vs 2.5% threshold</div>
+      <div class="kpi-delta pos">▼ Under target</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Returns &amp; Refunds</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Refund / Return Rate by Category</div>
+      <div id="refund-rates"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Return Reasons</div>
+      <div id="return-reasons"></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:22px">Top Returned Products &amp; Risk</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Top 6 Returned SKUs</div>
+      <table class="data-table" id="returned-skus"></table>
+    </div>
+    <div class="card">
+      <div class="card-title">Risk Indicators</div>
+      <div id="risk-indicators"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ TAB SWITCHING ══════════════════════════════════════════════
+function showTab(i) {
+  document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active', i===j));
+  document.querySelectorAll('.panel').forEach((p,j) => p.classList.toggle('active', i===j));
+}
+
+// ══ HELPERS ════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const clr = ['#111','#3d3d3d','#666','#888','#aaa'];
+const grn = '#1a7a4a', red = '#c0392b', amb = '#b45309';
+
+function progBar(container, items) {
+  // items: [{name, val, target, max, pre, suf}]
+  items.forEach(m => {
+    const pct  = Math.min(m.val / m.max * 100, 100);
+    const tpct = Math.min(m.target / m.max * 100, 100);
+    const over = m.val >= m.target;
+    const cls  = over ? 'ahead' : 'behind';
+    const d    = ((m.val - m.target) / m.target * 100).toFixed(1);
+    container.innerHTML += `<div class="prog-wrap">
+      <div class="prog-header">
+        <span class="prog-name">${m.name}</span>
+        <span class="prog-vals">${m.pre||''}${m.val}${m.suf||''} <span>/ target ${m.pre||''}${m.target}${m.suf||''}</span></span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill ${cls}" style="width:${pct}%"></div>
+        <div class="prog-marker" style="left:${tpct}%"></div>
+      </div>
+    </div>`;
+  });
+}
+
+function hbarChart(container, items, maxVal) {
+  items.forEach((m,i) => {
+    const pct  = Math.min(m.val / maxVal * 100, 100);
+    const tpct = m.target ? Math.min(m.target / maxVal * 100, 100) : null;
+    const over = !m.target || m.val >= m.target;
+    const delta = m.target ? ((m.val - m.target)/m.target*100).toFixed(1) : null;
+    const colors = ['#111','#333','#555','#777','#999','#bbb'];
+    container.innerHTML += `<div class="hbar-row">
+      <div class="hbar-label">${m.name}</div>
+      <div class="hbar-track">
+        <div class="hbar-fill" style="width:${Math.max(pct,3)}%;background:${m.color||colors[i%6]}">
+          <span>${m.pre||''}${m.display||m.val}${m.suf||''}</span>
+        </div>
+        ${tpct!==null?`<div class="hbar-tgt" style="left:${tpct}%"></div>`:''}
+      </div>
+      ${delta!==null?`<div class="hbar-delta" style="color:${over?grn:red}">${delta>0?'+':''}${delta}%</div>`:'<div class="hbar-delta"></div>'}
+    </div>`;
+  });
+}
+
+// ══ 01 REVENUE ════════════════════════════════════════════════
+const daily = [18200, 21400, 19800, 24600, 22100, 17300, 9600]; // Mon–Sun (Sun partial)
+const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const maxDay = Math.max(...daily);
+const dBars = $('daily-bars'), dLabels = $('daily-labels');
+daily.forEach((v,i) => {
+  const h = Math.round(v / maxDay * 88);
+  dBars.innerHTML += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+    <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">£${(v/1000).toFixed(0)}k</div>
+    <div style="width:100%;height:${h}px;border-radius:2px 2px 0 0;background:${i===6?grn:'var(--text)'}"></div>
+  </div>`;
+  dLabels.innerHTML += `<div style="flex:1;text-align:center;font-size:9px;color:var(--text3);font-family:var(--mono)">${dayNames[i]}${i===6?' *':''}</div>`;
+});
+
+progBar($('mtd-bars'), [
+  { name: 'Gross Revenue', val: 142.6, target: 135, max: 160, pre: '£', suf: 'k' },
+  { name: 'Net Revenue',   val: 134.1, target: 128, max: 160, pre: '£', suf: 'k' },
+  { name: 'Orders',        val: 3847,  target: 3600, max: 4500, pre: '', suf: '' },
+  { name: 'Units Sold',    val: 8214,  target: 8000, max: 10000, pre: '', suf: '' },
+]);
+
+// ══ 02 CONVERSION FUNNEL ══════════════════════════════════════
+const funnelSteps = [
+  { label:'Sessions',             val:42614, pct:100,   target:95,   suf:'k'  },
+  { label:'PDP Views',            val:51,    pct:51,    target:48,   suf:'%'  },
+  { label:'Add to Cart',          val:18,    pct:18,    target:20,   suf:'%'  },
+  { label:'Checkout Initiated',   val:10.8,  pct:10.8,  target:12,   suf:'%'  },
+  { label:'Checkout Completed',   val:7.4,   pct:7.4,   target:8.5,  suf:'%'  },
+  { label:'Purchase',             val:3.8,   pct:3.8,   target:4.2,  suf:'%'  },
+];
+const ff = $('full-funnel');
+funnelSteps.forEach((s,i) => {
+  const over = s.pct >= s.target;
+  const d = +(s.pct - s.target).toFixed(1);
+  const disp = i===0 ? (s.val/1000).toFixed(1)+'k' : s.val+s.suf;
+  ff.innerHTML += `<div class="funnel-step">
+    <div class="funnel-label">${s.label}</div>
+    <div class="funnel-track">
+      <div class="funnel-bar" style="width:${Math.max(s.pct,3)}%;background:${over?'var(--text)':red}">
+        <span>${disp}</span>
+      </div>
+      <div class="funnel-tgt" style="left:${s.target}%"></div>
+    </div>
+    <div class="funnel-delta" style="color:${over?grn:red}">${d>0?'+':''}${d}${i===0?'k':'pp'}</div>
+  </div>`;
+});
+
+// Device split
+const dSplit = $('device-split');
+dSplit.innerHTML = `<div class="split-seg" style="width:62%;background:#111">Mobile 62%</div>
+<div class="split-seg" style="width:38%;background:#555">Desktop 38%</div>`;
+
+const dBreak = $('device-breakdown');
+const devices = [
+  {name:'Mobile',sessions:'26,421',cvr:'3.2%',aov:'£31.40',bounce:'41%'},
+  {name:'Desktop',sessions:'16,193',cvr:'4.8%',aov:'£39.80',bounce:'32%'},
+  {name:'Tablet',sessions:'2,800', cvr:'3.9%',aov:'£35.10',bounce:'36%'},
+];
+let dt = `<table class="data-table"><thead><tr><th>Device</th><th>Sessions</th><th>CVR</th><th>AOV</th><th>Bounce</th></tr></thead><tbody>`;
+devices.forEach(d => { dt += `<tr><td>${d.name}</td><td style="font-family:var(--mono)">${d.sessions}</td><td style="font-family:var(--mono)">${d.cvr}</td><td style="font-family:var(--mono)">${d.aov}</td><td style="font-family:var(--mono)">${d.bounce}</td></tr>`; });
+dBreak.innerHTML = dt + '</tbody></table>';
+
+const fSummary = $('funnel-summary');
+const fRows = [
+  {stage:'Conversion Rate',rate:'3.8%',target:'4.2%',delta:'−0.4pp',pos:false},
+  {stage:'Add-to-Cart',rate:'18.0%',target:'20.0%',delta:'−2.0pp',pos:false},
+  {stage:'Checkout Init.',rate:'10.8%',target:'12.0%',delta:'−1.2pp',pos:false},
+  {stage:'Checkout Compl.',rate:'7.4%',target:'8.5%',delta:'−1.1pp',pos:false},
+  {stage:'Cart Abandonment',rate:'68.4%',target:'65%',delta:'+3.4pp',pos:false},
+  {stage:'Bounce Rate',rate:'38.2%',target:'42%',delta:'−3.8pp',pos:true},
+];
+fRows.forEach(r => {
+  fSummary.innerHTML += `<tr><td>${r.stage}</td><td style="font-family:var(--mono)">${r.rate}</td><td style="font-family:var(--mono);color:var(--text3)">${r.target}</td><td><span class="tag ${r.pos?'pos':'neg'}">${r.delta}</span></td></tr>`;
+});
+
+// ══ 03 MARKETING ═════════════════════════════════════════════
+const cpaData = [
+  {name:'Paid Search', val:8.20, target:10, max:20, pre:'£', display:'£8.20'},
+  {name:'Meta Ads',    val:9.80, target:10, max:20, pre:'£', display:'£9.80'},
+  {name:'TikTok',      val:12.40,target:11, max:20, pre:'£', display:'£12.40'},
+  {name:'Affiliates',  val:6.10, target:8,  max:20, pre:'£', display:'£6.10'},
+  {name:'Display',     val:14.20,target:12, max:20, pre:'£', display:'£14.20'},
+];
+hbarChart($('cpa-channels'), cpaData, 20);
+
+const roasTrend = [3.4, 3.7, 3.6, 3.9, 4.0, 3.8, 4.1, 4.2];
+const maxROAS = 5;
+const rt = $('roas-trend'), rl = $('roas-labels');
+roasTrend.forEach((v,i) => {
+  const h = Math.round(v/maxROAS*74);
+  rt.innerHTML += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+    <div style="font-size:8px;color:var(--text3);font-family:var(--mono)">${v}×</div>
+    <div style="width:100%;height:${h}px;border-radius:2px 2px 0 0;background:${i===7?grn:'var(--text)'}"></div>
+  </div>`;
+  rl.innerHTML += `<div style="flex:1;text-align:center;font-size:8px;color:var(--text3);font-family:var(--mono)">W${13+i}</div>`;
+});
+
+$('traffic-split').innerHTML = `<div class="split-seg" style="width:44%;background:#111">Paid 44%</div>
+<div class="split-seg" style="width:32%;background:#444">Organic 32%</div>
+<div class="split-seg" style="width:14%;background:#777">Email 14%</div>
+<div class="split-seg" style="width:10%;background:#aaa">Direct 10%</div>`;
+
+const tBreak = $('traffic-breakdown');
+const tRows = [
+  {src:'Paid Search', sessions:'10,421',rev:'£38.4k',cvr:'4.6%'},
+  {src:'Meta Ads',    sessions:'8,344', rev:'£28.1k',cvr:'3.8%'},
+  {src:'Organic SEO', sessions:'7,210', rev:'£21.6k',cvr:'4.2%'},
+  {src:'Email',       sessions:'5,980', rev:'£31.4k',cvr:'7.1%'},
+  {src:'Direct',      sessions:'4,261', rev:'£12.8k',cvr:'4.4%'},
+];
+let tb = `<table class="data-table"><thead><tr><th>Source</th><th>Sessions</th><th>Revenue</th><th>CVR</th></tr></thead><tbody>`;
+tRows.forEach(r => { tb += `<tr><td>${r.src}</td><td style="font-family:var(--mono)">${r.sessions}</td><td style="font-family:var(--mono)">${r.rev}</td><td style="font-family:var(--mono)">${r.cvr}</td></tr>`; });
+tBreak.innerHTML = tb + '</tbody></table>';
+
+// Attribution donut (SVG)
+const attrData = [{label:'Paid Search',pct:28,color:'#111'},{label:'Meta',pct:21,color:'#444'},{label:'Email',pct:23,color:'#666'},{label:'SEO',pct:16,color:'#999'},{label:'Other',pct:12,color:'#ccc'}];
+let cumAngle = -90, r = 36, cx = 50, cy = 50;
+let paths = '';
+attrData.forEach(a => {
+  const angle = a.pct/100*360;
+  const start = cumAngle * Math.PI/180;
+  const end = (cumAngle+angle) * Math.PI/180;
+  const x1 = cx + r*Math.cos(start), y1 = cy + r*Math.sin(start);
+  const x2 = cx + r*Math.cos(end),   y2 = cy + r*Math.sin(end);
+  const large = angle > 180 ? 1 : 0;
+  paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${a.color}"/>`;
+  cumAngle += angle;
+});
+const attrEl = $('attribution-donut');
+attrEl.innerHTML = `<svg width="100" height="100" viewBox="0 0 100 100">
+  ${paths}
+  <circle cx="50" cy="50" r="22" fill="white"/>
+</svg>
+<div class="donut-legend">
+  ${attrData.map(a=>`<div class="donut-leg-item"><div class="donut-dot" style="background:${a.color}"></div><div class="donut-leg-name">${a.label}</div><div class="donut-leg-val">${a.pct}%</div></div>`).join('')}
+</div>`;
+
+const chTable = $('channel-table');
+const chRows = [
+  {rank:'01',name:'Paid Search',rev:'£38.4k',roas:'4.8×',spend:'£8.0k',cpa:'£8.20'},
+  {rank:'02',name:'Email',      rev:'£31.4k',roas:'—',    spend:'£1.2k',cpa:'£1.80'},
+  {rank:'03',name:'Meta Ads',   rev:'£28.1k',roas:'3.9×', spend:'£7.2k',cpa:'£9.80'},
+  {rank:'04',name:'Organic SEO',rev:'£21.6k',roas:'—',    spend:'£2.1k',cpa:'£4.20'},
+  {rank:'05',name:'TikTok',     rev:'£14.8k',roas:'3.2×', spend:'£4.6k',cpa:'£12.40'},
+  {rank:'06',name:'Affiliates', rev:'£8.9k', roas:'6.1×', spend:'£1.5k',cpa:'£6.10'},
+];
+chTable.innerHTML = `<thead><tr><th>#</th><th>Channel</th><th>Revenue</th><th>ROAS</th><th>Spend</th><th>CPA</th></tr></thead><tbody>`;
+chRows.forEach(r => { chTable.innerHTML += `<tr><td class="rank">${r.rank}</td><td>${r.name}</td><td style="font-family:var(--mono)">${r.rev}</td><td style="font-family:var(--mono)">${r.roas}</td><td style="font-family:var(--mono);color:var(--text3)">${r.spend}</td><td style="font-family:var(--mono)">${r.cpa}</td></tr>`; });
+chTable.innerHTML += '</tbody>';
+
+// ══ 04 CRM & RETENTION ════════════════════════════════════════
+progBar($('email-metrics'), [
+  { name:'Open Rate',       val:28.4, target:25,   max:40,  suf:'%' },
+  { name:'Click Rate',      val:3.1,  target:3.5,  max:6,   suf:'%' },
+  { name:'Revenue / Email', val:0.38, target:0.40, max:0.6, pre:'£', suf:'' },
+  { name:'Unsubscribe Rate',val:0.21, target:0.30, max:0.5, suf:'%' },
+  { name:'List Growth Rate',val:2.4,  target:2.0,  max:4,   suf:'%' },
+]);
+
+hbarChart($('email-flows'), [
+  {name:'Welcome Series', val:9800, max:12000, display:'£9.8k',  color:'#111'},
+  {name:'Winback',        val:7200, max:12000, display:'£7.2k',  color:'#333'},
+  {name:'Abandonment',    val:6400, max:12000, display:'£6.4k',  color:'#555'},
+  {name:'Post-Purchase',  val:4800, max:12000, display:'£4.8k',  color:'#777'},
+  {name:'Browse Abandon', val:3200, max:12000, display:'£3.2k',  color:'#999'},
+], 12000);
+
+const crmW = [
+  {email:3800,sms:820},{email:3600,sms:780},{email:4100,sms:900},{email:3900,sms:850},
+  {email:4400,sms:1020},{email:4200,sms:980},{email:4600,sms:1100},{email:5200,sms:1240},
+];
+const maxCRM = Math.max(...crmW.map(w=>w.email+w.sms));
+const ct = $('crm-trend'), cl = $('crm-labels');
+crmW.forEach((w,i) => {
+  const eh = Math.round(w.email/maxCRM*80);
+  const sh = Math.round(w.sms/maxCRM*80);
+  ct.innerHTML += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
+    <div style="width:100%;height:${sh}px;border-radius:2px 2px 0 0;background:#bbb"></div>
+    <div style="width:100%;height:${eh}px;border-radius:0;background:${i===7?grn:'#333'}"></div>
+  </div>`;
+  cl.innerHTML += `<div style="flex:1;text-align:center;font-size:8px;color:var(--text3);font-family:var(--mono)">W${13+i}</div>`;
+});
+
+// ══ 05 PRODUCT PERFORMANCE ════════════════════════════════════
+const topSKUs = [
+  {name:'Protein Powder 1kg',    rev:'£14.8k',units:412,pct:'+14%',pos:true},
+  {name:'Whey Isolate 500g',     rev:'£9.6k', units:284,pct:'+8%', pos:true},
+  {name:'Creatine 300g',         rev:'£7.3k', units:540,pct:'+8%', pos:true},
+  {name:'Pre-Workout 400g',      rev:'£6.8k', units:198,pct:'+22%',pos:true},
+  {name:'Mass Gainer 2.5kg',     rev:'£5.9k', units:124,pct:'+3%', pos:true},
+  {name:'Collagen Peptides 300g',rev:'£5.4k', units:310,pct:'+31%',pos:true},
+  {name:'BCAA Capsules 120ct',   rev:'£4.5k', units:418,pct:'+13%',pos:true},
+  {name:'Magnesium 120ct',       rev:'£3.8k', units:390,pct:'+5%', pos:true},
+];
+const ts = $('top-skus');
+ts.innerHTML = '<thead><tr><th>#</th><th>SKU</th><th>Revenue</th><th>Units</th><th>vs Target</th></tr></thead><tbody>';
+topSKUs.forEach((s,i) => { ts.innerHTML += `<tr><td class="rank">0${i+1}</td><td>${s.name}</td><td style="font-family:var(--mono)">${s.rev}</td><td style="font-family:var(--mono)">${s.units}</td><td><span class="tag pos">${s.pct}</span></td></tr>`; });
+ts.innerHTML += '</tbody>';
+
+const worstSKUs = [
+  {name:'Casein Protein 1kg',     rev:'£1.2k',pct:'−38%'},
+  {name:'Fat Burner 60ct',        rev:'£0.8k',pct:'−31%'},
+  {name:'Energy Gels x12',        rev:'£0.6k',pct:'−28%'},
+  {name:'Omega-3 90ct',           rev:'£1.1k',pct:'−22%'},
+  {name:'Sleep Formula 60ct',     rev:'£0.9k',pct:'−19%'},
+  {name:'Electrolyte Powder 400g',rev:'£1.4k',pct:'−14%'},
+];
+const ws = $('worst-skus');
+ws.innerHTML = '<thead><tr><th>#</th><th>SKU</th><th>Revenue</th><th>vs Target</th></tr></thead><tbody>';
+worstSKUs.forEach((s,i) => { ws.innerHTML += `<tr><td class="rank">0${i+1}</td><td>${s.name}</td><td style="font-family:var(--mono)">${s.rev}</td><td><span class="tag neg">${s.pct}</span></td></tr>`; });
+ws.innerHTML += '</tbody>';
+
+hbarChart($('sku-conv'), [
+  {name:'Protein Powder 1kg', val:14.2, max:18, display:'14.2%', color:'#111'},
+  {name:'Pre-Workout 400g',   val:12.8, max:18, display:'12.8%', color:'#333'},
+  {name:'Creatine 300g',      val:11.4, max:18, display:'11.4%', color:'#555'},
+  {name:'Collagen Peptides',  val:9.6,  max:18, display:'9.6%',  color:'#777'},
+  {name:'BCAA Capsules',      val:8.1,  max:18, display:'8.1%',  color:'#999'},
+], 18);
+
+hbarChart($('units-cat'), [
+  {name:'Protein',    val:3240, max:4000, display:'3,240', color:'#111'},
+  {name:'Vitamins',   val:1820, max:4000, display:'1,820', color:'#444'},
+  {name:'Pre-Workout',val:1240, max:4000, display:'1,240', color:'#666'},
+  {name:'Recovery',   val:980,  max:4000, display:'980',   color:'#888'},
+  {name:'Weight Mgmt',val:620,  max:4000, display:'620',   color:'#aaa'},
+  {name:'Other',      val:314,  max:4000, display:'314',   color:'#ccc'},
+], 4000);
+
+// ══ 06 CUSTOMER EXPERIENCE ════════════════════════════════════
+progBar($('refund-rates'), [
+  { name:'Protein / Supplements', val:2.8, target:4, max:8, suf:'%' },
+  { name:'Pre-Workout',           val:4.2, target:4, max:8, suf:'%' },
+  { name:'Weight Management',     val:5.6, target:4, max:8, suf:'%' },
+  { name:'Accessories',           val:1.4, target:3, max:8, suf:'%' },
+  { name:'Bundles',               val:3.1, target:4, max:8, suf:'%' },
+]);
+
+const rr = $('return-reasons');
+const reasons = [
+  {text:'Product not as expected', pct:'28%'},
+  {text:'Taste / flavour dislike',  pct:'24%'},
+  {text:'Arrived damaged',          pct:'18%'},
+  {text:'Wrong item received',      pct:'12%'},
+  {text:'Delivery too slow',        pct:'10%'},
+  {text:'Changed mind',             pct:'8%'},
+];
+reasons.forEach(r => {
+  rr.innerHTML += `<div class="reason-row"><div class="reason-text">${r.text}</div><div class="reason-val">${r.pct}</div></div>`;
+});
+
+const retSKUs = $('returned-skus');
+retSKUs.innerHTML = '<thead><tr><th>#</th><th>SKU</th><th>Return Rate</th><th>Volume</th></tr></thead><tbody>';
+const retData = [
+  {name:'Fat Burner 60ct',       rate:'7.2%',vol:34},
+  {name:'Pre-Workout 400g',      rate:'4.8%',vol:28},
+  {name:'Weight Loss Bundle',    rate:'4.6%',vol:21},
+  {name:'Casein Protein 1kg',    rate:'3.9%',vol:18},
+  {name:'Sleep Formula 60ct',    rate:'3.4%',vol:12},
+  {name:'Protein Powder 1kg',    rate:'2.1%',vol:22},
+];
+retData.forEach((r,i) => { retSKUs.innerHTML += `<tr><td class="rank">0${i+1}</td><td>${r.name}</td><td style="font-family:var(--mono);color:${parseFloat(r.rate)>4?red:'var(--text)'}">${r.rate}</td><td style="font-family:var(--mono)">${r.vol}</td></tr>`; });
+retSKUs.innerHTML += '</tbody>';
+
+const risk = $('risk-indicators');
+const risks = [
+  {label:'Refund Rate',     val:'3.2%', threshold:'4.0%',  status:'pos', note:'Under threshold'},
+  {label:'Delivery Issues', val:'1.8%', threshold:'2.5%',  status:'pos', note:'Under threshold'},
+  {label:'Chargeback Rate', val:'0.12%',threshold:'0.20%', status:'pos', note:'Under threshold'},
+  {label:'NPS Score',       val:'68',   threshold:'60 min', status:'pos', note:'Healthy'},
+  {label:'CS Ticket Volume',val:'142',  threshold:'180 max',status:'pos', note:'Under threshold'},
+  {label:'Avg Resolution',  val:'6.4h', threshold:'8h max', status:'neu', note:'Within target'},
+];
+let riskHTML = `<table class="data-table"><thead><tr><th>Metric</th><th>Current</th><th>Threshold</th><th>Status</th></tr></thead><tbody>`;
+risks.forEach(r => { riskHTML += `<tr><td>${r.label}</td><td style="font-family:var(--mono)">${r.val}</td><td style="font-family:var(--mono);color:var(--text3)">${r.threshold}</td><td><span class="tag ${r.status}">${r.note}</span></td></tr>`; });
+risk.innerHTML = riskHTML + '</tbody></table>';
+</script>
+</body>
+</html>
